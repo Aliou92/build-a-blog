@@ -1,20 +1,14 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-  <h2>Build A Blog</h2>
-  {% if tasks|length == 0 %}
-  <p>No blog entries yet</p>
-  {% else %}
 
-  
-        {% for task in tasks %}
-        
-            <h2><a href="{{ url_for('blog', id=task.id) }}">{{task.title}}</a></h2>
-            <p>{{task.body}}</p>
-        {% endfor %}
-
-  {% endif %}
-
-
+    <h1>All Blogs</h1>
+    {% for blog in blogs %}
+        <h2><a href="/all_blogs?id={{blog.id}}">{{blog.title}}</a></h2>
+        <p></p>
+        <p>{{blog.body}}</p>
+        <p></p>
+        <p></p>
+    {% endfor %}
 
 {% endblock %}

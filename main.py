@@ -18,32 +18,55 @@ class Blog(db.Model):
         self.body = body
 
 
-@app.route("/", methods=['GET'])
-def main():
-    return render_template("newpost.html")
+def no_entry(text):
+
+    if text:
+        return False
+    else:
+        return True
+
+@app.route('/')
+def redirect_main():
+    return redirect('/all_blogs')
+
+@app.route('/all_blogs')
+def blog():
+
+    blog_id = request.args.get('id')
+
+    if blog_id:
+        view_blog=Blog.query.get(blog_id)
+        return render_template('blog.html', blog=view_blog)
+    else:
+        show_all = Blog.query.all()
+        return render_template('all_blogs.html', blogs=show_all)
 
 @app.route('/newpost', methods=['POST', 'GET'])
-def index():
-    return render_template("newpost.html")
+def new_post():
 
-@app.route('/blog?id=<id>', methods=['GET'])
-def blog(id):
-    post = Blog.query.filter_by(id=int(id))
-   
-    return render_template('/blog.html', tasks=post)
+    title_error = ""
+    blog_error = ""
 
-@app.route('/all_blogs', methods=['POST', 'GET'])
-def all_blogs():
     if request.method == 'POST':
-        blog_head = request.form['blog_title']
-        blog_body = request.form['blog_body']
-        new_blog = Blog(blog_head, blog_body)
-        db.session.add(new_blog)
-        db.session.commit()
+        add_title = request.form['blog_title']
+        add_blog = request.form['blog_body']
+        add_all = Blog(add_title, add_blog)
 
-    tasks = Blog.query.all()
+        if no_entry(add_title):
+            title_error = "A title is required."
+            if no_entry(add_blog):
+                blog_error = "A text is required for the blog."
+            return render_template('newpost.html', title_error=title_error, blog_error=blog_error)
+        elif no_entry(add_blog):
+            blog_error = "A text is required for the blog."
+            return render_template('newpost.html', title_error=title_error, blog_error=blog_error)
+        else:
+            db.session.add(add_all)
+            db.session.commit()
+            show_blog = "/all_blogs?id=" + str(add_all.id)
+            return redirect(show_blog)
+    else:
+        return render_template('newpost.html')
 
-    return render_template("all_blogs.html", tasks = tasks)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run()
